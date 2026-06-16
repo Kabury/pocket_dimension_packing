@@ -1,0 +1,11 @@
+{
+  "name": "pocket_dimension_packing",
+  "version": "1.0.0",
+  "title": "Pocket dimension packing",
+  "author": "Kabury",
+  "contact": "",
+  "homepage": "",
+  "description": "Adds chests that pack items",
+  "factorio_version": "2.0",
+  "dependencies": ["base >= 2.0.2", "klib" ]
+}
