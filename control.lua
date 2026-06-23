@@ -64,7 +64,7 @@ script.on_init(function()
 end)
 
 local function reorganize(event)
-    if event.setting == "pii-spreader" then init_entities(event) end
+    if event.setting == "pii-spreader" then init_entities() end
 end
 
 script.on_event(defines.events.on_runtime_mod_setting_changed, reorganize)
@@ -74,7 +74,8 @@ script.on_event(defines.events.on_runtime_mod_setting_changed, reorganize)
 --- Keep track of all of our entities
 
 local function OnEntityCreated(event)
-    local entity = event.created_entity or event.entity --Player or script
+    if event.effect_id ~= "pii-built-entity" then return end
+    local entity = event.target_entity
     if not (entity and entity.valid) then return end
     local id = entity.unit_number
     local clock = event.tick + 1
@@ -88,32 +89,7 @@ local function OnEntityCreated(event)
     future[#future+1]=id
 end
 
-local function OnEntityRemoved(event)
-    local entity = event.entity
-    if not (entity and entity.valid) then return end
-
-    storage.ChestPool[entity.unit_number] = nil
-end
-
-
-
-local prefilter = {"packer-chest-1","packer-chest-2","packer-chest-3","unpacker-chest-1","unpacker-chest-2","unpacker-chest-3"}
-local filter = {}
-for _,name in pairs(prefilter) do
-    filter[#filter+1] = {filter = "name", name = name}
-end
-local creation_events = {
-    defines.events.on_built_entity,              -- Player built
-    defines.events.on_entity_cloned,             -- Entity copied
-    defines.events.on_robot_built_entity,        -- Robot built
-    defines.events.on_space_platform_built_entity, -- Space platform
-    defines.events.script_raised_built,          -- Script created
-    defines.events.script_raised_revive          -- Entity revived
-}
-
-for _, event in pairs(creation_events) do
-    script.on_event(event, OnEntityCreated, filter)
-end
+script.on_event(defines.events.on_script_trigger_effect, OnEntityCreated)
 
 
 
@@ -137,7 +113,7 @@ local function pack_item(chest,slots,magic)
     elseif slots == 3 then
         box.set_stack(magic.slots.iron)
     elseif slots == 10 then
-       box.set_stack(magic.slots.steel)
+        box.set_stack(magic.slots.steel)
     end
 
     local pocket_dimension = box.get_inventory(defines.inventory.item_main)
